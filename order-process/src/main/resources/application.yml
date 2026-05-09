@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: order-process
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    consumer:
+      group-id: order-processing-group  # DIFFERENT group → receives all messages too
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        spring.json.trusted.packages: com.spring.poc.kafka.model
+        spring.json.value.default.type: com.spring.poc.kafka.model.Order  # Only if Service as One event type multiple remove these line
+        #spring.json.use.type.headers: true   # One Topic Multiple Event Types
+    listener:
+      concurrency: 3
+
+server:
+  port: 8082
