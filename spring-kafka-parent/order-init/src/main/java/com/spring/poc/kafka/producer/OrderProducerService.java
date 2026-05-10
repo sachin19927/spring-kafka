@@ -1,9 +1,11 @@
 package com.spring.poc.kafka.producer;
 
 import com.spring.poc.kafka.model.Order;
+import com.spring.poc.kafka.model.OrderEvent;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -18,25 +20,28 @@ import static org.springframework.kafka.support.KafkaHeaders.TOPIC;
 @RequiredArgsConstructor
 public class OrderProducerService {
 
-    private final KafkaTemplate<String, Order> kafkaTemplate;
+    private final KafkaTemplate<String, OrderEvent> kafkaTemplate;
 
-    public CompletableFuture<SendResult<String, Order>> sendOrder(Order order) {
-        // Use customerId as key for partition affinity (same customer → same partition)
-        String key = order.customerId() != null ? order.customerId() : UUID.randomUUID().toString();
+    @Value("${kafka.topic}")
+    private String topic;
 
-        log.info("Sending order: {} with key: {}", order.orderId(), key);
+    public CompletableFuture<SendResult<String, OrderEvent>> sendOrderEvent(OrderEvent event) {
+        String key = event.orderId();
 
-        CompletableFuture<SendResult<String, Order>> future =
-                kafkaTemplate.send("orders", key, order);
+        log.info("[PRODUCER] Sending {} event for order: {}", event.eventType(), key);
+
+        CompletableFuture<SendResult<String, OrderEvent>> future =
+                kafkaTemplate.send(topic, key, event);
 
         future.whenComplete((result, ex) -> {
             if (ex == null) {
-                log.info("Sent order=[{}] to partition=[{}] with offset=[{}]",
-                        order.orderId(),
+                log.info("[PRODUCER] Sent {} to partition={}, offset={}",
+                        event.eventType(),
                         result.getRecordMetadata().partition(),
                         result.getRecordMetadata().offset());
             } else {
-                log.error("Unable to send order=[{}] due to: {}", order.orderId(), ex.getMessage());
+                log.error("[PRODUCER] Failed to send {}: {}",
+                        event.eventType(), ex.getMessage());
             }
         });
 

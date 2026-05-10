@@ -6,14 +6,36 @@ spring:
     consumer:
       group-id: order-processing-group  # DIFFERENT group → receives all messages too
       auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 50
+      heartbeat-interval-ms: 3000
+      session-timeout-ms: 10000
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
       properties:
         spring.json.trusted.packages: com.spring.poc.kafka.model
-        spring.json.value.default.type: com.spring.poc.kafka.model.Order  # Only if Service as One event type multiple remove these line
-        #spring.json.use.type.headers: true   # One Topic Multiple Event Types
+        spring.json.use.type.headers: true   # One Topic Multiple Event Types
     listener:
       concurrency: 3
+      ack-mode: record
+      missing-topics-fatal: false
+      poll-timeout: 3000
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        spring.json.add.type.headers: true
 
 server:
   port: 8082
+
+kafka:
+  topic: orders
+  dlt:
+    topic: orders.DLQ
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

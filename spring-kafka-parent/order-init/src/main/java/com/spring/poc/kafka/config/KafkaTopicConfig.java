@@ -28,4 +28,10 @@ public class KafkaTopicConfig {
         // 3 partitions, 3 replicas
         return new NewTopic("orders", 3, (short) 3);
     }
+
+    @Bean
+    public NewTopic ordersDlqTopic() {
+        // 3 partitions, 3 replicas
+        return new NewTopic("orders.DLQ", 3, (short) 1);
+    }
 }
