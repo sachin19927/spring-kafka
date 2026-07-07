@@ -2,7 +2,7 @@ spring:
   application:
     name: order-process
   kafka:
-    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    bootstrap-servers: ${KAFKA_EXTERNAL_HOST:localhost}:9092,${KAFKA_EXTERNAL_HOST:localhost}:9093,${KAFKA_EXTERNAL_HOST:localhost}:9094
     consumer:
       group-id: order-processing-group  # DIFFERENT group → receives all messages too
       auto-offset-reset: earliest

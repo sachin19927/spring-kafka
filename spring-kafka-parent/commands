@@ -1,0 +1,52 @@
+docker system prune -a -f
+docker system prune -a --volumes
+
+docker compose --env-file .env.local -f docker-compose-kafka-kraft.yaml up -d
+docker compose --env-file .env.local -f docker-compose-kafka-tools.yaml up -d
+docker compose --env-file .env.local -f docker-compose.schema-rest.yaml up -d
+
+docker compose --env-file .env.local -f docker-compose-kafka-kraft.yaml down
+docker compose --env-file .env.local -f docker-compose-kafka-tools.yaml down
+docker compose --env-file .env.local -f docker-compose.schema-rest.yaml down
+
+docker compose --env-file .env.aws -f docker-compose-kafka-kraft.yaml up -d
+docker compose --env-file .env.aws -f docker-compose-kafka-tools.yaml up -d
+docker compose --env-file .env.aws -f docker-compose.schema-rest.yaml up -d
+
+docker compose --env-file .env.aws -f docker-compose-kafka-kraft.yaml down
+docker compose --env-file .env.aws -f docker-compose-kafka-tools.yaml down
+docker compose --env-file .env.aws -f docker-compose.schema-rest.yaml down
+
+set KAFKA_EXTERNAL_HOST=localhost
+
+set KAFKA_EXTERNAL_HOST=13.233.55.120
+
+Kafka Rest EP
+curl http://localhost:7075/
+{}
+curl http://localhost:7075/topics
+["test-topic","_schemas"]
+
+
+curl http://localhost:7074
+{}
+curl http://localhost:7074/subjects
+
+Register Schema
+Step 1: create an json file user-schema.json
+
+{
+  "schema": "{\"type\":\"record\",\"name\":\"User\",\"namespace\":\"com.example.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"}]}"
+}
+
+Step 2: Register Schema
+
+curl -X POST \
+-H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data @user-schema.json \
+http://localhost:8081/subjects/users-value/versions
+
+Step 3: Get Schema
+
+curl http://localhost:8081/subjects/users-value/versions/latest
+
