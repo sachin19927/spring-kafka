@@ -1,9 +1,11 @@
 package com.spring.poc.kafka.controller;
 
-import com.spring.poc.kafka.model.Order;
-import com.spring.poc.kafka.model.OrderRequest;
-import com.spring.poc.kafka.producer.OrderProducerService;
+import com.spring.poc.kafka.dto.OrderRequest;
+import com.spring.poc.kafka.dto.OrderResponse;
+import com.spring.poc.kafka.service.OrderInitService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,39 +13,16 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderProducerService producerService;
+    private final OrderInitService orderInitService;
 
     @PostMapping
-    public ResponseEntity<String> createOrder(@RequestBody OrderRequest request) {
-        Order order = new Order(
-                UUID.randomUUID(),
-                request.customerId(),
-                request.productId(),
-                request.quantity(),
-                request.price(),
-                Order.OrderStatus.PENDING
-        );
-
-        CompletableFuture<?> future = producerService.sendOrder(order);
-
-        return ResponseEntity.accepted()
-                .body("Order " + order.orderId() + " accepted for processing");
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<String> testOrder() {
-        OrderRequest request = new OrderRequest(
-                "CUST-001",
-                "Wireless Keyboard",
-                1,
-                new BigDecimal("9.99")
-        );
-        createOrder(request);
-        return ResponseEntity.ok("Test order fired");
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
+        OrderResponse response = orderInitService.createOrder(request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }

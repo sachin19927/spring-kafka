@@ -1,32 +1,26 @@
-package com.spring.poc.kafka.producer;
+package com.spring.poc.kafka.service;
 
 import com.spring.poc.kafka.dto.OrderRequest;
 import com.spring.poc.kafka.dto.OrderResponse;
 import com.spring.poc.kafka.events.Order;
 import com.spring.poc.kafka.events.OrderStatus;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import static org.springframework.kafka.support.KafkaHeaders.TOPIC;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OrderProducerService {
+public class OrderInitService {
 
+    private final KafkaTemplate<String, Order> kafkaTemplate;
 
     @Value("${app.kafka.topics.order-events}")
     private String orderEventsTopic;
-
-    private final KafkaTemplate<String, Order> kafkaTemplate;
 
     /**
      * Builds a new Order in CREATED status and publishes it to the
@@ -65,4 +59,3 @@ public class OrderProducerService {
         return new OrderResponse(orderId, OrderStatus.CREATED.name(), "Order accepted");
     }
 }
-
