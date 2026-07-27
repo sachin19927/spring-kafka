@@ -1,6 +1,7 @@
 package com.spring.poc.kafka.service;
 
-import com.spring.poc.kafka.model.Order;
+import com.spring.poc.kafka.events.Order;
+import com.spring.poc.kafka.events.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Service;
 public class AlertNotificationService {
 
     @KafkaListener(
-            topics = "orders",
-            groupId = "alert-notification-group",
+            topics = "${app.kafka.topics.order-events}",
+            groupId = "${spring.kafka.consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void handleOrderForAlert(
@@ -27,26 +28,26 @@ public class AlertNotificationService {
         log.info("ALERT SERVICE | Received Order: {}", order);
 
         // Alert logic: High value orders, cancelled orders, etc.
-        if (order.price().doubleValue() > 1000.00) {
+        if (order.getAmount() > 1000.00) {
             sendHighValueAlert(order);
         }
 
-        if (order.status() == Order.OrderStatus.CANCELLED) {
+        if (order.getStatus() == OrderStatus.FAILED) {
             sendCancellationAlert(order);
         }
 
         // Send email/push notification logic here
-        log.info("ALERT SERVICE | Alert processed for order: {}", order.orderId());
+        log.info("ALERT SERVICE | Alert processed for order: {}", order.getOrderId());
     }
 
     private void sendHighValueAlert(Order order) {
         log.warn("HIGH VALUE ORDER ALERT: Order {} from customer {} amount: ${}",
-                order.orderId(), order.customerId(), order.price());
+                order.getOrderId(), order.getCustomerId(), order.getAmount());
         // Implement email/SMS/push notification
     }
 
     private void sendCancellationAlert(Order order) {
         log.warn("ORDER CANCELLED ALERT: Order {} by customer {}",
-                order.orderId(), order.customerId());
+                order.getOrderId(), order.getCustomerId());
     }
 }

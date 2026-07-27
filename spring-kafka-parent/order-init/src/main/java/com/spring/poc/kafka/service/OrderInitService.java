@@ -43,18 +43,17 @@ public class OrderInitService {
                 .setUpdatedTimestamp(now)
                 .build();
 
-        kafkaTemplate.send(orderEventsTopic, orderId, order)
-                .whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("Failed to publish order {} to {}", orderId, orderEventsTopic, ex);
-                    } else {
-                        log.info("Published order {} to {} (partition={}, offset={})",
-                                orderId,
-                                orderEventsTopic,
-                                result.getRecordMetadata().partition(),
-                                result.getRecordMetadata().offset());
-                    }
-                });
+        try {
+            var sendResult = kafkaTemplate.send(orderEventsTopic, orderId, order).get();
+            log.info("Published order {} to {} (partition={}, offset={})",
+                    orderId,
+                    orderEventsTopic,
+                    sendResult.getRecordMetadata().partition(),
+                    sendResult.getRecordMetadata().offset());
+        } catch (Exception ex) {
+            log.error("Failed to publish order {} to {}", orderId, orderEventsTopic, ex);
+            throw new RuntimeException("Failed to create order: " + ex.getMessage(), ex);
+        }
 
         return new OrderResponse(orderId, OrderStatus.CREATED.name(), "Order accepted");
     }

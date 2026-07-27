@@ -16,6 +16,15 @@ public class KafkaTopicConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    @Value("${app.kafka.topics.order-events}")
+    private String orderEventsTopic;
+
+    @Value("${spring.kafka.topic-configs.order-events.partitions:3}")
+    private Integer orderEventsPartitions;
+
+    @Value("${spring.kafka.topic-configs.order-events.replicas:3}")
+    private Short orderEventsReplicas;
+
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
@@ -25,7 +34,6 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic ordersTopic() {
-        // 3 partitions, 3 replicas
-        return new NewTopic("orders", 3, (short) 3);
+        return new NewTopic(orderEventsTopic, orderEventsPartitions, orderEventsReplicas);
     }
 }

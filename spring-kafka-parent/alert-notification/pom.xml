@@ -35,10 +35,9 @@
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
-		<!-- JSON -->
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-avro-serializer</artifactId>
 		</dependency>
 
 		<!-- Lombok -->

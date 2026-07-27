@@ -1,6 +1,7 @@
 package com.spring.poc.kafka.service;
 
-import com.spring.poc.kafka.model.Order;
+import com.spring.poc.kafka.events.Order;
+import com.spring.poc.kafka.events.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Service;
 public class OrderProcessingService {
 
     @KafkaListener(
-            topics = "orders",
-            groupId = "order-processing-group",
+            topics = "${app.kafka.topics.order-events}",
+            groupId = "${spring.kafka.consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void processOrder(
@@ -30,13 +31,13 @@ public class OrderProcessingService {
             // Business logic: validate inventory, process payment, update DB
             validateInventory(order);
             processPayment(order);
-            updateOrderStatus(order, Order.OrderStatus.CONFIRMED);
+            updateOrderStatus(order, OrderStatus.COMPLETED);
 
-            log.info("PROCESSING SERVICE | Order {} processed successfully", order.orderId());
+            log.info("PROCESSING SERVICE | Order {} processed successfully", order.getOrderId());
 
         } catch (Exception e) {
             log.error("PROCESSING SERVICE | Failed to process order {}: {}",
-                    order.orderId(), e.getMessage());
+                    order.getOrderId(), e.getMessage());
             // Dead Letter Queue logic here
             throw e; // Triggers retry/DLQ based on configuration
         }
@@ -45,18 +46,18 @@ public class OrderProcessingService {
 
     private void validateInventory(Order order) {
         log.info("Validating inventory for product: {}, qty: {}",
-                order.productId(), order.quantity());
+                order.getProduct(), order.getQuantity());
         // Inventory check logic
     }
 
     private void processPayment(Order order) {
         log.info("Processing payment of ${} for order: {}",
-                order.price(), order.orderId());
+                order.getAmount(), order.getOrderId());
         // Payment gateway integration
     }
 
-    private void updateOrderStatus(Order order, Order.OrderStatus status) {
-        log.info("Updating order {} status to: {}", order.orderId(), status);
+    private void updateOrderStatus(Order order, OrderStatus status) {
+        log.info("Updating order {} status to: {}", order.getOrderId(), status);
         // Database update
     }
 

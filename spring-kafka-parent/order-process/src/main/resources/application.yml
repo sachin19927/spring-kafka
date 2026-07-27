@@ -7,13 +7,17 @@ spring:
       group-id: order-processing-group  # DIFFERENT group → receives all messages too
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
-        spring.json.trusted.packages: com.spring.poc.kafka.model
-        spring.json.value.default.type: com.spring.poc.kafka.model.Order  # Only if Service as One event type multiple remove these line
-        #spring.json.use.type.headers: true   # One Topic Multiple Event Types
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:7074}
+        specific.avro.reader: true
     listener:
       concurrency: 3
+
+app:
+  kafka:
+    topics:
+      order-events: order-events
 
 server:
   port: 8082

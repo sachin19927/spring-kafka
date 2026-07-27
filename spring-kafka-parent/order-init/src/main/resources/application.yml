@@ -6,14 +6,21 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      acks: all
+      retries: 3
       properties:
-        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:7074}
         auto.register.schemas: true
+        enable.idempotence: true
 
 app:
   kafka:
     topics:
       order-events: order-events
+    topic-configs:
+      order-events:
+        partitions: 3
+        replicas: 3
 
 server:
-  port: 8081
+  port: 8084
