@@ -28,6 +28,8 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<springwolf.version>2.5.0</springwolf.version>
+		<spotless.version>3.8.0</spotless.version>
 		<lombok.version>1.18.36</lombok.version>
 		<jackson.version>2.18.2</jackson.version>
 		<jackson.version>2.18.2</jackson.version>
@@ -72,6 +74,18 @@
 				<version>${confluent.version}</version>
 			</dependency>
 
+			<!--Springwolf -->
+			<dependency>
+				<groupId>io.github.springwolf</groupId>
+				<artifactId>springwolf-ui</artifactId>
+				<version>${springwolf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.github.springwolf</groupId>
+				<artifactId>springwolf-kafka</artifactId>
+				<version>${springwolf.version}</version>
+			</dependency>
+
 			<!-- Explicit versions for production stability -->
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -83,6 +97,33 @@
 	</dependencyManagement>
 
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>${spotless.version}</version>
+				<configuration>
+					<java>
+						<palantirJavaFormat>
+							<version>2.90.0</version>
+							<style>PALANTIR</style>
+						</palantirJavaFormat>
+						<removeUnusedImports>
+							<engine>google-java-format</engine>
+						</removeUnusedImports>
+					</java>
+					<lineEndings>UNIX</lineEndings>
+				</configuration>
+				<executions>
+					<execution>
+						<id>check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -101,6 +142,8 @@
 					<configuration>
 						<source>${java.version}</source>
 						<target>${java.version}</target>
+						<release>${java.version}</release>
+						<failOnWarning>false</failOnWarning>
 						<annotationProcessorPaths>
 							<path>
 								<groupId>org.projectlombok</groupId>
@@ -114,6 +157,105 @@
 					<groupId>org.apache.avro</groupId>
 					<artifactId>avro-maven-plugin</artifactId>
 					<version>${avro.maven.plugin.version}</version>
+					<configuration>
+						<stringType>String</stringType>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.15</version>
+					<executions>
+						<execution>
+							<id>prepare-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+							<configuration>
+								<destFile>${project.build.directory}/jacoco-ut.exec</destFile>
+							</configuration>
+						</execution>
+						<execution>
+							<id>pre-integration-prepare</id>
+							<goals>
+								<goal>prepare-agent-integration</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>post-integration-test</phase>
+							<goals>
+								<goal>merge</goal>
+							</goals>
+							<configuration>
+								<fileSets>
+									<FileSet>
+										<directory>${project.build.directory}</directory>
+										<includes>
+											<include>*.exec</include>
+										</includes>
+									</FileSet>
+								</fileSets>
+							</configuration>
+						</execution>
+						<execution>
+							<id>merged-report-generation</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.6.1</version>
+					<executions>
+						<execution>
+							<id>generated-source</id>
+							<goals>
+								<goal>add-source</goal>
+							</goals>
+							<configuration>
+								<sources>
+									<source>${project.build.directory}/generated-sources/avro</source>
+								</sources>
+							</configuration>
+						</execution>
+						<execution>
+							<id>add-integration-test-sources</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>add-test-source</goal>
+							</goals>
+							<configuration>
+								<sources>
+									<source>src/integrationTest/java</source>
+								</sources>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>3.1.2</version>
+					<configuration>
+						<includes>
+							<include>**/*IT.java</include>
+							<include>**/*Test.java</include>
+						</includes>
+						<failIfNoTests>false</failIfNoTests>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>integration-test</goal>
+								<goal>verify</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

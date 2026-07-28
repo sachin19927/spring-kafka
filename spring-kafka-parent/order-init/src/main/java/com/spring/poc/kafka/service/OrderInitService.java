@@ -4,13 +4,12 @@ import com.spring.poc.kafka.dto.OrderRequest;
 import com.spring.poc.kafka.dto.OrderResponse;
 import com.spring.poc.kafka.events.Order;
 import com.spring.poc.kafka.events.OrderStatus;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -44,8 +43,10 @@ public class OrderInitService {
                 .build();
 
         try {
-            var sendResult = kafkaTemplate.send(orderEventsTopic, orderId, order).get();
-            log.info("Published order {} to {} (partition={}, offset={})",
+            var sendResult =
+                    kafkaTemplate.send(orderEventsTopic, orderId, order).get();
+            log.info(
+                    "Published order {} to {} (partition={}, offset={})",
                     orderId,
                     orderEventsTopic,
                     sendResult.getRecordMetadata().partition(),

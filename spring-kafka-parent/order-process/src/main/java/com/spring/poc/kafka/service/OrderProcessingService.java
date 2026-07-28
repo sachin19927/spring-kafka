@@ -16,8 +16,7 @@ public class OrderProcessingService {
     @KafkaListener(
             topics = "${app.kafka.topics.order-events}",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+            containerFactory = "kafkaListenerContainerFactory")
     public void processOrder(
             @Payload Order order,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
@@ -36,23 +35,19 @@ public class OrderProcessingService {
             log.info("PROCESSING SERVICE | Order {} processed successfully", order.getOrderId());
 
         } catch (Exception e) {
-            log.error("PROCESSING SERVICE | Failed to process order {}: {}",
-                    order.getOrderId(), e.getMessage());
+            log.error("PROCESSING SERVICE | Failed to process order {}: {}", order.getOrderId(), e.getMessage());
             // Dead Letter Queue logic here
             throw e; // Triggers retry/DLQ based on configuration
         }
-
     }
 
     private void validateInventory(Order order) {
-        log.info("Validating inventory for product: {}, qty: {}",
-                order.getProduct(), order.getQuantity());
+        log.info("Validating inventory for product: {}, qty: {}", order.getProduct(), order.getQuantity());
         // Inventory check logic
     }
 
     private void processPayment(Order order) {
-        log.info("Processing payment of ${} for order: {}",
-                order.getAmount(), order.getOrderId());
+        log.info("Processing payment of ${} for order: {}", order.getAmount(), order.getOrderId());
         // Payment gateway integration
     }
 
@@ -60,5 +55,4 @@ public class OrderProcessingService {
         log.info("Updating order {} status to: {}", order.getOrderId(), status);
         // Database update
     }
-
 }

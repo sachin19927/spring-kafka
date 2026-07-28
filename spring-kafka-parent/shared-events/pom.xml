@@ -21,6 +21,15 @@
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>io.github.springwolf</groupId>
+			<artifactId>springwolf-ui</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.springwolf</groupId>
+			<artifactId>springwolf-kafka</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -43,11 +52,23 @@
 						<configuration>
 							<sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
 							<outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
-							<stringType>String</stringType>
 							<fieldVisibility>private</fieldVisibility>
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>build-helper-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

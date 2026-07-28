@@ -16,8 +16,7 @@ public class AlertNotificationService {
     @KafkaListener(
             topics = "${app.kafka.topics.order-events}",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+            containerFactory = "kafkaListenerContainerFactory")
     public void handleOrderForAlert(
             @Payload Order order,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
@@ -41,13 +40,15 @@ public class AlertNotificationService {
     }
 
     private void sendHighValueAlert(Order order) {
-        log.warn("HIGH VALUE ORDER ALERT: Order {} from customer {} amount: ${}",
-                order.getOrderId(), order.getCustomerId(), order.getAmount());
+        log.warn(
+                "HIGH VALUE ORDER ALERT: Order {} from customer {} amount: ${}",
+                order.getOrderId(),
+                order.getCustomerId(),
+                order.getAmount());
         // Implement email/SMS/push notification
     }
 
     private void sendCancellationAlert(Order order) {
-        log.warn("ORDER CANCELLED ALERT: Order {} by customer {}",
-                order.getOrderId(), order.getCustomerId());
+        log.warn("ORDER CANCELLED ALERT: Order {} by customer {}", order.getOrderId(), order.getCustomerId());
     }
 }
