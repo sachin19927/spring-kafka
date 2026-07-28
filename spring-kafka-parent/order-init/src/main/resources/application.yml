@@ -1,6 +1,8 @@
 spring:
   application:
     name: order-init
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
   kafka:
     bootstrap-servers: ${KAFKA_EXTERNAL_HOST:localhost}:9092,${KAFKA_EXTERNAL_HOST:localhost}:9093,${KAFKA_EXTERNAL_HOST:localhost}:9094
     producer:
@@ -12,6 +14,13 @@ spring:
         schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:7074}
         auto.register.schemas: true
         enable.idempotence: true
+        # Performance tuning
+        linger.ms: 100
+        batch.size: 16384
+        compression.type: snappy
+        # Timeout configuration
+        request.timeout.ms: 30000
+        delivery.timeout.ms: 120000
 
 app:
   kafka:
@@ -24,3 +33,40 @@ app:
 
 server:
   port: 8084
+  shutdown: graceful
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,springwolf
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+springwolf:
+  enabled: true
+  docket:
+    base-package: com.spring.poc.kafka
+    info:
+      title: Order Init Service
+      version: 1.0.0
+      description: >-
+        REST endpoint that creates order and publishes the initial CREATED event to Kafka
+        This service acts as producer, sending order events to order-events topic for downstream services to consume
+    servers:
+      local:
+        host: localhost:9092
+        protocol: kafka
+        description: Local Development Kafka cluster
+      docker-compose:
+        host: kafka:29093
+        protocol: kafka
+        description: Docker Compose Kafka Service
