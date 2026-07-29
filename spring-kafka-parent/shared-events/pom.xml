@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>com.spring.poc.kafka</groupId>
 		<artifactId>kafka-poc-parent</artifactId>
@@ -13,63 +17,126 @@
 	<packaging>jar</packaging>
 
 	<name>Shared Events</name>
-	<description>Avro schemas and generated event classes shared across order-init, order-process and alert-notification</description>
 
+	<description>
+		Shared Avro schemas, generated event classes, DTOs and enums
+		used by all Kafka microservices.
+	</description>
 
 	<dependencies>
+
+		<!-- Apache Avro Runtime -->
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>io.github.springwolf</groupId>
-			<artifactId>springwolf-ui</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.springwolf</groupId>
-			<artifactId>springwolf-kafka</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>
+
 		<plugins>
-			<!-- No spring-boot plugin for library module -->
+
+			<!-- Java Compiler -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
+
+			<!-- Generate Java classes from .avsc -->
 			<plugin>
+
 				<groupId>org.apache.avro</groupId>
 				<artifactId>avro-maven-plugin</artifactId>
+
 				<executions>
+
 					<execution>
+
 						<id>generate-avro-sources</id>
+
 						<phase>generate-sources</phase>
+
 						<goals>
 							<goal>schema</goal>
 						</goals>
+
 						<configuration>
-							<sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
-							<outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
-							<fieldVisibility>private</fieldVisibility>
+
+							<sourceDirectory>
+								${project.basedir}/src/main/avro
+							</sourceDirectory>
+
+							<outputDirectory>
+								${project.build.directory}/generated-sources/avro
+							</outputDirectory>
+
+							<stringType>String</stringType>
+
+							<fieldVisibility>PRIVATE</fieldVisibility>
+
+							<createSetters>true</createSetters>
+
+							<enableDecimalLogicalType>true</enableDecimalLogicalType>
+
 						</configuration>
+
 					</execution>
+
 				</executions>
+
 			</plugin>
 
+			<!-- Add generated Avro sources -->
 			<plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>build-helper-maven-plugin</artifactId>
+
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+
+				<executions>
+
+					<execution>
+
+						<id>add-generated-sources</id>
+
+						<phase>generate-sources</phase>
+
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+
+						<configuration>
+
+							<sources>
+
+								<source>
+									${project.build.directory}/generated-sources/avro
+								</source>
+
+							</sources>
+
+						</configuration>
+
+					</execution>
+
+				</executions>
+
 			</plugin>
+
+			<!-- JaCoCo -->
 			<plugin>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Integration Tests -->
 			<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-failsafe-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
+
 		</plugins>
+
 	</build>
+
 </project>

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>com.spring.poc.kafka</groupId>
 		<artifactId>kafka-poc-parent</artifactId>
@@ -13,44 +17,64 @@
 	<packaging>jar</packaging>
 
 	<name>Order Init Service</name>
-	<description>REST entrypoint that creates orders and publishes the initial CREATED event to Kafka</description>
+
+	<description>
+		REST API that creates orders and publishes OrderEvent
+		messages to Kafka using Confluent Schema Registry.
+	</description>
 
 	<dependencies>
-		<!-- Internal shared events -->
+
+		<!-- Shared Avro Models -->
 		<dependency>
 			<groupId>com.spring.poc.kafka</groupId>
 			<artifactId>shared-events</artifactId>
 		</dependency>
 
+		<!-- Spring Boot -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+		<!-- Kafka -->
+
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
+
+		<!-- Confluent Avro Serializer -->
+
 		<dependency>
 			<groupId>io.confluent</groupId>
 			<artifactId>kafka-avro-serializer</artifactId>
 		</dependency>
 
+		<!-- Springwolf -->
+
 		<dependency>
 			<groupId>io.github.springwolf</groupId>
 			<artifactId>springwolf-ui</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>io.github.springwolf</groupId>
 			<artifactId>springwolf-kafka</artifactId>
 		</dependency>
+
+		<!-- Lombok -->
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -58,44 +82,54 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Testing -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>
+
 		<finalName>order-init</finalName>
+
 		<plugins>
+
+			<!-- Spring Boot -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Java Compiler -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
 
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-			</plugin>
+			<!-- JaCoCo -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Failsafe -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 
 		</plugins>
+
 	</build>
+
 </project>

@@ -1,6 +1,8 @@
 spring:
   application:
     name: order-process
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
   kafka:
     bootstrap-servers: ${KAFKA_EXTERNAL_HOST:localhost}:9092,${KAFKA_EXTERNAL_HOST:localhost}:9093,${KAFKA_EXTERNAL_HOST:localhost}:9094
     consumer:
@@ -11,8 +13,13 @@ spring:
       properties:
         schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:7074}
         specific.avro.reader: true
+        # Enable DLT (Dead letter topic) support
+        isolation.level: read_committed
+      max-poll-records: 100
+      max-poll-interval-ms: 300000
     listener:
       concurrency: 3
+      ack-mode: record
 
 app:
   kafka:
@@ -21,3 +28,39 @@ app:
 
 server:
   port: 8082
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 1024
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,springwolf
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+springwolf:
+  enabled: true
+  docket:
+    base-package: com.spring.poc.kafka
+    info:
+      title: Order Processing Service
+      version: 1.0.0
+      description: >-
+        Order processing service that consumes order events from order-events topic(Kafka)
+        This service acts as consumer, receiving order events from order-events topic and processing order state transition for downstream services to consume
+        Includes Dead letter topic (DLT) support for handling failed messages.
+    servers:
+      local:
+        host: localhost:9092
+        protocol: kafka
+        description: Local Development Kafka cluster
+      docker-compose:
+        host: kafka:29093
+        protocol: kafka
+        description: Docker Compose Kafka Service
